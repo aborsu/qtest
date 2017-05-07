@@ -2,6 +2,7 @@ import _ from 'lodash';
 import express from 'express';
 import bunyan from 'bunyan';
 
+import constants from './constants';
 import bodyParser from './middlewares/body-parser';
 import session from './middlewares/session';
 import passport from './middlewares/passport';
@@ -42,5 +43,11 @@ app.delete('/api/session', (req, res) => {
   }
   return res.send();
 });
+
+app.get('/api/resources/carMakes', (req, res) => {
+  res.send(constants.carMakes);
+});
+
+
 
 export default app;
