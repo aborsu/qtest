@@ -6,6 +6,7 @@ import constants from './constants';
 import bodyParser from './middlewares/body-parser';
 import session from './middlewares/session';
 import passport from './middlewares/passport';
+import quotes from './models/quote';
 
 const log = bunyan.createLogger({ name: module.id });
 
@@ -44,10 +45,42 @@ app.delete('/api/session', (req, res) => {
   return res.send();
 });
 
-app.get('/api/resources/carMakes', (req, res) => {
+app.get('/api/carMakes', (req, res) => {
   res.send(constants.carMakes);
 });
 
+app.post('/api/quotes', (req, res) => {
+  if (!req.isAuthenticated()) {
+    res.send(401).send('Invalid session.');
+  }
+
+  const quote = quotes.build(Object.assign(req.body, { user: req.user.login }));
+
+  quote.validate()
+    .then((err) => {
+      if (err) {
+        log.error(
+          {
+            data: Object.assign(req.body, { user: req.user.login }),
+            err,
+          },
+          'QUOTE_CREATE_INVALID',
+        );
+        return res.status(500).send('Could not create quote.');
+      }
+      return quote.save();
+    })
+    .then(saved => res.send(saved.get()));
+});
+
+app.get('/api/quotes', (req, res) => {
+  if (!req.isAuthenticated()) {
+    res.send(401).send('Invalid session.');
+  }
+
+  quotes.findAll({ where: { user: req.user.login } })
+    .then(results => res.send(results));
+});
 
 
 export default app;
