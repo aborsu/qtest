@@ -2,6 +2,7 @@ import _ from 'lodash';
 import express from 'express';
 import bunyan from 'bunyan';
 
+import computePrice from './controllers/computePrice';
 import constants from './constants';
 import bodyParser from './middlewares/body-parser';
 import session from './middlewares/session';
@@ -68,9 +69,23 @@ app.post('/api/quotes', (req, res) => {
         );
         return res.status(500).send('Could not create quote.');
       }
-      return quote.save();
+      const [status, price, msg] = computePrice(quote);
+      quote.set('status', status);
+      quote.set('price', price);
+
+      return quote.save().then(savedQuote =>
+        res.send(Object.assign(savedQuote.get(), { msg })));
     })
-    .then(saved => res.send(saved.get()));
+    .catch((err) => {
+      log.error(
+        {
+          data: Object.assign(req.body, { user: req.user.login }),
+          err,
+        },
+        'QUOTE_CREATE_FAIL',
+      );
+      return res.status(500).send('Could not create quote.');
+    });
 });
 
 app.get('/api/quotes', (req, res) => {
