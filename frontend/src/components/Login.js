@@ -50,7 +50,7 @@ class Login extends Component {
 
   render() {
     if (this.props.user) {
-      browserHistory.replace('/foo');
+      browserHistory.replace('/quotes');
     }
     return (
       <div className="col-xs-12 col-md-6 col-md-offset-3">
