@@ -7,6 +7,9 @@ module.exports = {
     user: process.env.DB_USER || 'user',
     password: process.env.DB_PASSWORD || 'password',
   },
+  mandrill: {
+    apiKey: process.env.MANDRILL_APIKEY,
+  },
   session: {
     secret: process.env.SESSION_SECRET || 'tajnik',
   },
