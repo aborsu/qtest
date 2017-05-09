@@ -26,16 +26,20 @@ class Login extends Component {
   login(e) {
     e.preventDefault();
     this.setState({ loading: true });
-    axios.post('http://localhost:3001/api/session', {
-      login: this.state.login,
-      password: this.state.password,
+    axios({
+      method: 'post',
+      url: 'http://localhost:3001/api/session',
+      withCredentials: true,
+      data: {
+        login: this.state.login,
+        password: this.state.password,
+      },
     })
     .then((response) => {
       this.props.login(response.data.login);
     })
     .catch((error) => {
       if (!error.response || error.response.status !== 401) {
-        console.log(error);
         return this.setState({
           loading: false,
           error: 'Ooops something went wrong.',
