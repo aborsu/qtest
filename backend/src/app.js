@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import express from 'express';
 import bunyan from 'bunyan';
+import cors from 'cors';
 
 import computePrice from './controllers/computePrice';
 import constants from './constants';
@@ -14,6 +15,7 @@ const log = bunyan.createLogger({ name: module.id });
 const app = express();
 
 // Middlewares
+app.use(cors());
 bodyParser(app);
 session(app);
 passport(app);
