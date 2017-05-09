@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
+import { browserHistory, Link } from 'react-router';
 
 class Layout extends Component {
 
   logout() {
     this.props.logout();
+    browserHistory.replace('/');
   }
   renderLogin() {
     return <ul className="nav navbar-nav navbar-right">
