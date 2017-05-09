@@ -1,10 +1,10 @@
-import _ from 'lodash';
+
 import express from 'express';
 import bunyan from 'bunyan';
-import cors from 'cors';
 
 import computePrice from './controllers/computePrice';
 import constants from './constants';
+import cors from './middlewares/cors';
 import bodyParser from './middlewares/body-parser';
 import session from './middlewares/session';
 import passport from './middlewares/passport';
@@ -15,7 +15,7 @@ const log = bunyan.createLogger({ name: module.id });
 const app = express();
 
 // Middlewares
-app.use(cors());
+cors(app);
 bodyParser(app);
 session(app);
 passport(app);
@@ -37,7 +37,10 @@ app.post('/api/session', (req, res) => {
       log.error('AUTHENTICATION_FAIL', { data: { user } });
       return res.status(500).send('AUTHENTICATION_FAIL');
     }
-    return res.send(_.pick(user, ['login']));
+    return res.send({
+      login: user.login,
+      cookie: req.session.id,
+    });
   });
 });
 
@@ -45,21 +48,18 @@ app.delete('/api/session', (req, res) => {
   if (req.isAuthenticated()) {
     req.logout();
   }
-  return res.send();
+  return res.send('');
 });
 
-app.get('/api/carMakes', (req, res) => {
-  res.send(constants.carMakes);
-});
+app.get('/api/carMakes', (req, res) => res.send(constants.carMakes));
 
 app.post('/api/quotes', (req, res) => {
   if (!req.isAuthenticated()) {
-    res.send(401).send('Invalid session.');
+    return res.status(401).send('Invalid session.');
   }
 
   const quote = quotes.build(Object.assign(req.body, { user: req.user.login }));
-
-  quote.validate()
+  return quote.validate()
     .then((err) => {
       if (err) {
         log.error(
